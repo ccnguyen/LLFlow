@@ -2,18 +2,16 @@
 
 
 #### general settings
-name: LOL_v2-color_as_full_z_gt0.2_lr5e-4_ablation2
-# name: no-delay-batch16_patch160_L_3_iter3W_gaussianNoise5Prob0_ModifiedConEncoder1_noSplit_nb16_concat_histeq_logLow_EncoderGammaCurve
-
+name: train_color_as_full_z_nosieMapBugFixed_noavgpool
 use_tb_logger: true
 model: LLFlow
 distortion: sr
 scale: 1
-gpu_ids: [ 0]
-dataset: LoL_v2
+gpu_ids: [0]
+dataset: lowlight
 optimize_all_z: false
 cond_encoder: ConEncoder1
-train_gt_ratio: 0.5
+train_gt_ratio: 0.2
 avg_color_map: false
 
 concat_histeq: true
@@ -28,19 +26,17 @@ align_maxpool: true
 to_yuv: false
 
 encode_color_map: false
-
 le_curve: false
 # sigmoid_output: true
 
 #### datasets
 datasets:
   train:
-    # name: LoL
-    root: D:\Dataset\LOL-v2\LOL-v2
+    root: /home/cindy/PycharmProjects/data/lowLightDataset
     quant: 32
     use_shuffle: true
-    n_workers: 2   # per GPU
-    batch_size: 16 # 12
+    n_workers: 1  # per GPU
+    batch_size: 16
     use_flip: true
     color: RGB
     use_crop: true
@@ -48,9 +44,10 @@ datasets:
     noise_prob: 0
     noise_level: 5
     log_low: true
+    gamma_aug: false
 
   val:
-    root: D:\Dataset\LOL-v2\LOL-v2
+    root: /home/cindy/PycharmProjects/data/lowLightDataset
     n_workers: 1
     quant: 32
     n_max: 20
@@ -58,10 +55,14 @@ datasets:
     log_low: true
 
 #### Test Settings
-dataroot_unpaired: /home/cindy/PycharmProjects/LLFlow/test_dataset
-dataroot_GT: D:\LOLdataset\eval15\high
-dataroot_LR: D:\LOLdataset\eval15\low
-model_path: /home/cindy/PycharmProjects/LLFlow/LOLv2.pth
+dataroot_unpaired: //home/cindy/PycharmProjects/LLFlow/test_dataset
+#dataroot_GT: /home/cindy/PycharmProjects/data/lowLightDataset256/gt/test
+#dataroot_LR: /home/cindy/PycharmProjects/data/lowLightDataset256/input/test/1
+dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
+dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
+#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15/high
+#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15/low
+model_path: /home/cindy/PycharmProjects/lowlight-baselines/LLFlow/LOL.pth
 heat: 0 # This is the standard deviation of the latent vectors
 
 #### network structures
@@ -96,12 +97,12 @@ path:
 #### training settings: learning rate scheme, loss
 train:
   manual_seed: 10
-  lr_G: !!float 5e-4
-  weight_decay_G: 0 #1e-5 # 1e-5 # 5e-5 # 1e-5
+  lr_G: !!float 5e-4 # normalizing flow 5e-4; l1 loss train 5e-5
+  weight_decay_G: 0 # 1e-5 # 5e-5 # 1e-5
   beta1: 0.9
   beta2: 0.99
   lr_scheme: MultiStepLR
-  warmup_iter: 200  # no warm up
+  warmup_iter: 10  # no warm up
   lr_steps_rel: [ 0.5, 0.75, 0.9, 0.95 ] # [0.2, 0.35, 0.5, 0.65, 0.8, 0.95]  # [ 0.5, 0.75, 0.9, 0.95 ]
   lr_gamma: 0.5
 
@@ -109,8 +110,8 @@ train:
   # flow_warm_up_iter: -1
   weight_fl: 1
 
-  niter: 40000 #200000
-  val_freq: 1000
+  niter: 30000 #200000
+  val_freq: 200
 
 #### validation settings
 val:
@@ -123,5 +124,5 @@ test:
 #### logger
 logger:
   # Debug print_freq: 100
-  print_freq: 100
-  save_checkpoint_freq: !!float 1e4
+  print_freq: 200
+  save_checkpoint_freq: !!float 1e3

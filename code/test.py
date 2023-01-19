@@ -98,7 +98,7 @@ def main():
 
     measure = Measure(use_gpu=False)
 
-    fname = f'measure_full.csv'
+    fname = f'measure_lol_778.csv'
     fname_tmp = fname + "_"
     path_out_measures = os.path.join(test_dir, fname_tmp)
     path_out_measures_final = os.path.join(test_dir, fname)
@@ -114,6 +114,7 @@ def main():
 
     pad_factor = 2
 
+
     for lr_path, hr_path, idx_test in zip(lr_paths, hr_paths, range(len(lr_paths))):
 
         lr = imread(lr_path)
@@ -121,7 +122,7 @@ def main():
         his = hiseq_color_cv2_img(lr)
         if opt.get("histeq_as_input", False):
             lr = his
-        
+
         # Pad image to be % 2
         h, w, c = lr.shape
         lq_orig = lr.copy()
@@ -148,7 +149,9 @@ def main():
         sr = rgb(torch.clamp(sr_t*(mean_gt/mean_out), 0, 1))
         sr = sr[:h * scale, :w * scale]
 
+
         path_out_sr = os.path.join(test_dir, "{:0.2f}".format(heat).replace('.', ''), os.path.basename(hr_path))
+        path_out_sr = os.path.join(test_dir, 'lol_778', os.path.basename(hr_path))
 
         imwrite(path_out_sr, sr)
 

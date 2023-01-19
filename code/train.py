@@ -19,6 +19,7 @@ from models import create_model
 from utils.timer import Timer, TickTock
 from utils.util import get_resume_paths
 from data.LoL_dataset import LoL_Dataset, LoL_Dataset_v2
+from data.SID_dataset import LowLight_Dataset
 from torchvision.utils import save_image
 import torchvision.transforms as T
 
@@ -53,7 +54,7 @@ def main():
     #### options
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, help='Path to option YMAL file.',
-                            default='./confs/low-light-server-modified_encoder.yml' if sys.platform != 'win32' else './confs/LOL_smallNet.yml') #  './confs/LOLv2-pc_rebuttal.yml') # 
+                            default='./confs/lowlight_local.yml') #  './confs/LOLv2-pc_rebuttal.yml') #
     parser.add_argument('--launcher', choices=['none', 'pytorch'], default='none',
                         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
@@ -102,10 +103,7 @@ def main():
             version = float(torch.__version__[0:3])
             if version >= 1.1:  # PyTorch 1.1
                 # from torch.utils.tensorboard import SummaryWriter
-                if sys.platform != 'win32':
-                    from tensorboardX import SummaryWriter
-                else:
-                    from torch.utils.tensorboard import SummaryWriter
+                from torch.utils.tensorboard import SummaryWriter
             else:
                 logger.info(
                     'You are using PyTorch {}. Tensorboard will use [tensorboardX]'.format(version))
@@ -139,6 +137,8 @@ def main():
         dataset_cls = LoL_Dataset
     elif opt['dataset'] == 'LoL_v2':
         dataset_cls = LoL_Dataset_v2
+    elif opt['dataset'] == 'lowlight':
+        dataset_cls = LowLight_Dataset
     else:
         raise NotImplementedError()
 
