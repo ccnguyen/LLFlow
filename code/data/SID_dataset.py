@@ -95,9 +95,9 @@ class LowLight_Dataset(data.Dataset):
             lr = torch.randn(lr.shape) * (self.noise_level / 255) + lr
         if self.log_low:
             lr = torch.log(torch.clamp(lr + 1e-3, min=1e-3))
-        if self.gpu:
-           hr = hr.cuda()
-           lr = lr.cuda()
+        # if self.gpu:
+        #    hr = hr.cuda()
+        #    lr = lr.cuda()
         if self.concat_histeq:
             his = self.to_tensor(his)
             lr = torch.cat([lr, his], dim=0)

@@ -58,10 +58,10 @@ datasets:
 dataroot_unpaired: //home/cindy/PycharmProjects/LLFlow/test_dataset
 #dataroot_GT: /home/cindy/PycharmProjects/data/lowLightDataset256/gt/test
 #dataroot_LR: /home/cindy/PycharmProjects/data/lowLightDataset256/input/test/1
-dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
-dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
-#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15/high
-#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15/low
+#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
+#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
+dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high
+dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low
 model_path: /home/cindy/PycharmProjects/lowlight-baselines/LLFlow/LOL.pth
 heat: 0 # This is the standard deviation of the latent vectors
 

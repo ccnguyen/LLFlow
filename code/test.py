@@ -93,12 +93,12 @@ def main():
     hr_paths = fiFindByWildcard(os.path.join(hr_dir, '*.png'))
 
     this_dir = os.path.dirname(os.path.realpath(__file__))
-    test_dir = os.path.join(this_dir, '..', 'results', conf)
+    test_dir = os.path.join(this_dir, '..', 'results', 'eval256')
     print(f"Out dir: {test_dir}")
 
     measure = Measure(use_gpu=False)
 
-    fname = f'measure_lol_778.csv'
+    fname = f'measure_lol.csv'
     fname_tmp = fname + "_"
     path_out_measures = os.path.join(test_dir, fname_tmp)
     path_out_measures_final = os.path.join(test_dir, fname)
@@ -151,7 +151,7 @@ def main():
 
 
         path_out_sr = os.path.join(test_dir, "{:0.2f}".format(heat).replace('.', ''), os.path.basename(hr_path))
-        path_out_sr = os.path.join(test_dir, 'lol_778', os.path.basename(hr_path))
+        # path_out_sr = os.path.join(test_dir, 'lol_778', os.path.basename(hr_path))
 
         imwrite(path_out_sr, sr)
 

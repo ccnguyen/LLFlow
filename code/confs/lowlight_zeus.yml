@@ -32,7 +32,7 @@ le_curve: false
 #### datasets
 datasets:
   train:
-    root: /home/cindy/PycharmProjects/data/lowLightDataset
+    root: /data/cindy/lowLightDataset
     quant: 32
     use_shuffle: true
     n_workers: 1  # per GPU
@@ -47,7 +47,7 @@ datasets:
     gamma_aug: false
 
   val:
-    root: /home/cindy/PycharmProjects/data/lowLightDataset
+    root: /data/cindy/lowLightDataset
     n_workers: 1
     quant: 32
     n_max: 20
@@ -124,5 +124,5 @@ test:
 #### logger
 logger:
   # Debug print_freq: 100
-  print_freq: 5
+  print_freq: 200
   save_checkpoint_freq: !!float 1e3
