@@ -189,8 +189,6 @@ def main():
                 nll = 0
             else:
                 nll = model.optimize_parameters(current_step)
-            # tb_logger_train.add_scalar('loss/nll', nll, current_step)
-            # sys.exit()
 
             #### log
             def eta(t_iter):
