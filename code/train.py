@@ -21,6 +21,7 @@ from utils.timer import Timer, TickTock
 from utils.util import get_resume_paths
 from data.LoL_dataset import LoL_Dataset, LoL_Dataset_v2
 from data.SID_dataset import LowLight_Dataset, SonyTif_Dataset
+
 from torchvision.utils import save_image
 import torchvision.transforms as T
 
@@ -55,7 +56,7 @@ def main():
     #### options
     parser = argparse.ArgumentParser()
     parser.add_argument('--opt', type=str, help='Path to option YMAL file.',
-                            default='./confs/low-light-server-modified_encoder.yml' if sys.platform != 'win32' else './confs/LOL_smallNet.yml') #  './confs/LOLv2-pc_rebuttal.yml') # 
+                            default='./confs/lowlight_local.yml') #  './confs/LOLv2-pc_rebuttal.yml') #
     parser.add_argument('--launcher', choices=['none', 'pytorch'], default='none',
                         help='job launcher')
     parser.add_argument('--local_rank', type=int, default=0)
@@ -86,8 +87,9 @@ def main():
     #### mkdir and loggers
     if rank <= 0:  # normal training (rank -1) OR distributed training (rank 0)
         if resume_state is None:
-            util.mkdir_and_rename(
+            custom_path = util.mkdir_and_rename(
                 opt['path']['experiments_root'])  # rename experiment folder if exists
+            print('########### NEW PATH', custom_path)
             util.mkdirs((path for key, path in opt['path'].items() if not key == 'experiments_root'
                          and 'pretrain_model' not in key and 'resume' not in key))
 
@@ -102,12 +104,15 @@ def main():
         # tensorboard logger
         if opt.get('use_tb_logger', False) and 'debug' not in opt['name']:
             version = float(torch.__version__[0:3])
-
             from torch.utils.tensorboard import SummaryWriter
             conf_name = basename(args.opt).replace(".yml", "")
             exp_dir = opt['path']['experiments_root']
-            log_dir_train = os.path.join(exp_dir, 'tb', conf_name, 'train')
-            log_dir_valid = os.path.join(exp_dir, 'tb', conf_name, 'valid')
+            # log_dir_train = os.path.join(exp_dir, 'tb', conf_name, 'train')
+            # log_dir_valid = os.path.join(exp_dir, 'tb', conf_name, 'valid')
+
+            log_dir_train = os.path.join(custom_path, 'tb', conf_name, 'train')
+            log_dir_valid = os.path.join(custom_path, 'tb', conf_name, 'valid')
+            print('######################### LOGGING IN', log_dir_train)
             tb_logger_train = SummaryWriter(log_dir=log_dir_train)
             tb_logger_valid = SummaryWriter(log_dir=log_dir_valid)
     else:
@@ -174,6 +179,7 @@ def main():
     for epoch in range(start_epoch, total_epochs + 1):
         timerData.tick()
         for _, train_data in enumerate(train_loader):
+
             timerData.tock()
             current_step += 1
             if current_step > total_iters:
@@ -202,7 +208,7 @@ def main():
                 print(message)
             timer.tick()
             # Reduce number of logs
-            if current_step % 5 == 0 and args.tfboard:
+            if current_step % 5 == 0:
                 tb_logger_train.add_scalar('loss/nll', nll, current_step)
                 tb_logger_train.add_scalar('lr/base', model.get_current_learning_rate(), current_step)
                 tb_logger_train.add_scalar('time/iteration', timer.get_last_iteration(), current_step)
@@ -210,6 +216,8 @@ def main():
                 tb_logger_train.add_scalar('time/eta', eta(timer.get_last_iteration()), current_step)
                 for k, v in model.get_current_log().items():
                     tb_logger_train.add_scalar(k, v, current_step)
+
+                sys.exit()
 
             # validation
             if current_step % opt['train']['val_freq'] == 0 and rank <= 0:

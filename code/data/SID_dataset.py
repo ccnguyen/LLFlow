@@ -39,11 +39,6 @@ class LowLight_Dataset(data.Dataset):
         self.dark_paths = [f for f in os.listdir(self.dark_root) if os.path.isfile(os.path.join(self.dark_root, f))]
         self.light_paths = [f for f in os.listdir(self.light_root) if os.path.isfile(os.path.join(self.light_root, f))]
 
-
-        # print(train, 'dark', len(self.dark_paths))
-        # print(train, 'light', len(self.light_paths))
-
-        # self.pairs = self.load_pairs(self.dark)
         self.to_tensor = ToTensor()
 
     def __len__(self):
@@ -79,7 +74,6 @@ class LowLight_Dataset(data.Dataset):
             light_path = f'{self.light_root}/{dark_path.split("/")[-1][0:5]}_00_30s.png'
 
         hr = cv2.imread(light_path)
-
         f_name = self.dark_paths[item][:-4]
         his = self.hiseq_color_cv2_img(lr)
         # lr, hr, f_name, his = self.pairs[item]
@@ -211,6 +205,11 @@ class SonyTif_Dataset(data.Dataset):
             hr = center_crop(hr, self.center_crop_hr_size),
             lr = center_crop(lr, self.center_crop_hr_size)
             his = center_crop(his, self.center_crop_hr_size)
+=======
+            hr, lr, his = center_crop(hr, self.center_crop_hr_size), center_crop(lr,
+                                                                                 self.center_crop_hr_size), center_crop(
+                his, self.center_crop_hr_size)
+>>>>>>> e1a7af4bdbe4f8a49bf480bdd9ed8eddb79484e5
 
         if self.use_flip:
             hr, lr, his = random_flip(hr, lr, his)

@@ -34,7 +34,7 @@ class Measure():
             score, diff = ssim(cv2.cvtColor(imgA, cv2.COLOR_RGB2GRAY), cv2.cvtColor(imgB, cv2.COLOR_RGB2GRAY), full=True, multichannel=True)
         # multichannel: If True, treat the last dimension of the array as channels. Similarity calculations are done independently for each channel then averaged.
         else:
-            score, diff = ssim(imgA, imgB, full=True, multichannel=True)
+            score, diff = ssim(imgA, imgB, full=True, channel_axis=-1)
         return score
 
     def psnr(self, imgA, imgB):
