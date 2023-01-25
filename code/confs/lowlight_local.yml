@@ -2,13 +2,13 @@
 
 
 #### general settings
-name: lol
+name: lowlight
 use_tb_logger: true
 model: LLFlow
 distortion: sr
 scale: 1
 gpu_ids: [0]
-dataset: LoL
+dataset: lowlight
 optimize_all_z: false
 cond_encoder: ConEncoder1
 train_gt_ratio: 0.2
@@ -32,11 +32,11 @@ le_curve: false
 #### datasets
 datasets:
   train:
-    root: /home/cindy/PycharmProjects/data/LOL
+    root: /home/cindy/PycharmProjects/data/lowLightDataset
     quant: 32
     use_shuffle: true
     n_workers: 1  # per GPU
-    batch_size: 8
+    batch_size: 16
     use_flip: true
     color: RGB
     use_crop: true
@@ -47,7 +47,7 @@ datasets:
     gamma_aug: false
 
   val:
-    root: /home/cindy/PycharmProjects/data/LOL
+    root: /home/cindy/PycharmProjects/data/lowLightDataset
     n_workers: 1
     quant: 32
     n_max: 20
@@ -55,10 +55,14 @@ datasets:
     log_low: true
 
 #### Test Settings
-dataroot_unpaired: /home/data/Dataset/LOL_test/Fusion
-dataroot_GT: D:\LOLdataset\eval15\high
-dataroot_LR: D:\LOLdataset\eval15\low
-model_path: C:/Users/Yufei/OneDrive - Nanyang Technological University (1)/Project/LowLightFlowAAAI/experiments/LOL_v2-color_as_full_z_gt0.2_lr5e-4/models/39000_G.pth 
+dataroot_unpaired: //home/cindy/PycharmProjects/LLFlow/test_dataset
+#dataroot_GT: /home/cindy/PycharmProjects/data/lowLightDataset256/gt/test
+#dataroot_LR: /home/cindy/PycharmProjects/data/lowLightDataset256/input/test/1
+dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
+dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
+#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15/high
+#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15/low
+model_path: /home/cindy/PycharmProjects/lowlight-baselines/LLFlow/LOL.pth
 heat: 0 # This is the standard deviation of the latent vectors
 
 #### network structures
@@ -93,21 +97,21 @@ path:
 #### training settings: learning rate scheme, loss
 train:
   manual_seed: 10
-  lr_G: !!float 1e-6 # normalizing flow 5e-4; l1 loss train 5e-5
+  lr_G: !!float 5e-5 # normalizing flow 5e-4; l1 loss train 5e-5
   weight_decay_G: 0 # 1e-5 # 5e-5 # 1e-5
   beta1: 0.9
   beta2: 0.99
   lr_scheme: MultiStepLR
-  warmup_iter: 50  # no warm up
+  warmup_iter: 10  # no warm up
   lr_steps_rel: [ 0.5, 0.75, 0.9, 0.95 ] # [0.2, 0.35, 0.5, 0.65, 0.8, 0.95]  # [ 0.5, 0.75, 0.9, 0.95 ]
   lr_gamma: 0.5
 
   weight_l1: 0
-#  flow_warm_up_iter: -1
+  # flow_warm_up_iter: -1
   weight_fl: 1
 
   niter: 30000 #200000
-  val_freq: 300
+  val_freq: 100 # 200
 
 #### validation settings
 val:
@@ -120,5 +124,5 @@ test:
 #### logger
 logger:
   # Debug print_freq: 100
-  print_freq: 200
+  print_freq: 5
   save_checkpoint_freq: !!float 1e3

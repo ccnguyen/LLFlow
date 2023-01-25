@@ -11,6 +11,7 @@ import torch
 import torch.distributed as dist
 import torch.multiprocessing as mp
 import torch.nn as nn
+import torchvision
 
 import options.options as option
 from utils import util
@@ -19,6 +20,7 @@ from models import create_model
 from utils.timer import Timer, TickTock
 from utils.util import get_resume_paths
 from data.LoL_dataset import LoL_Dataset, LoL_Dataset_v2
+from data.SID_dataset import LowLight_Dataset, SonyTif_Dataset
 from torchvision.utils import save_image
 import torchvision.transforms as T
 
@@ -100,16 +102,8 @@ def main():
         # tensorboard logger
         if opt.get('use_tb_logger', False) and 'debug' not in opt['name']:
             version = float(torch.__version__[0:3])
-            if version >= 1.1:  # PyTorch 1.1
-                # from torch.utils.tensorboard import SummaryWriter
-                if sys.platform != 'win32':
-                    from tensorboardX import SummaryWriter
-                else:
-                    from torch.utils.tensorboard import SummaryWriter
-            else:
-                logger.info(
-                    'You are using PyTorch {}. Tensorboard will use [tensorboardX]'.format(version))
-                from tensorboard import SummaryWriter
+
+            from torch.utils.tensorboard import SummaryWriter
             conf_name = basename(args.opt).replace(".yml", "")
             exp_dir = opt['path']['experiments_root']
             log_dir_train = os.path.join(exp_dir, 'tb', conf_name, 'train')
@@ -139,6 +133,10 @@ def main():
         dataset_cls = LoL_Dataset
     elif opt['dataset'] == 'LoL_v2':
         dataset_cls = LoL_Dataset_v2
+    elif opt['dataset'] == 'lowlight':
+        dataset_cls = LowLight_Dataset
+    elif opt['dataset'] == 'sony_tif':
+        dataset_cls = SonyTif_Dataset
     else:
         raise NotImplementedError()
 
@@ -254,27 +252,35 @@ def main():
                                                                                             'colormap_{:s}.png'.format(
                                                                                                 img_name)), normalize=True)
                         normal_img = util.tensor2img(visuals['NORMAL'])  # uint8
-                        save_img_path = os.path.join(img_dir,
-                                                     '{:s}_{:d}.png'.format(img_name, current_step))
+                        save_img_path = os.path.join(img_dir, '{:s}_{:d}.png'.format(img_name, current_step))
+
+                        print(f'Saving image at iter {current_step}')
                         # util.save_img(sr_img, save_img_path)
                     assert normal_img is not None
 
                     # Save LQ images for reference
-                    save_img_path_lq = os.path.join(opt['path']['val_images'], 'low_light',
-                                                    '{:s}_LQ.png'.format(img_name))
+                    save_img_path_lq = os.path.join(opt['path']['val_images'], 'low_light', '{:s}_LQ.png'.format(img_name))
                     if not os.path.isfile(save_img_path_lq):
+                        os.makedirs(os.path.join(opt['path']['val_images'], 'low_light'), exist_ok=True)
+
                         lq_img = util.tensor2img(visuals['LQ'])  # uint8
                         util.save_img(
-                            cv2.resize(lq_img, dsize=None, fx=opt['scale'], fy=opt['scale'],
-                                       interpolation=cv2.INTER_NEAREST),
+                            cv2.resize(lq_img, dsize=None, fx=opt['scale'], fy=opt['scale'], interpolation=cv2.INTER_NEAREST),
                             save_img_path_lq)
 
                     # Save GT images for reference
                     gt_img = util.tensor2img(visuals['GT'])  # uint8
-                    save_img_path_gt = os.path.join(opt['path']['val_images'], 'ground_truth',
-                                                    '{:s}_GT.png'.format(img_name))
+
+                    save_img_path_gt = os.path.join(opt['path']['val_images'], 'ground_truth', '{:s}_GT.png'.format(img_name))
+
                     if not os.path.isfile(save_img_path_gt):
+                        os.makedirs(os.path.join(opt['path']['val_images'], 'ground_truth'), exist_ok=True)
                         util.save_img(gt_img, save_img_path_gt)
+
+                    out = torch.stack([visuals['NORMAL'], visuals['GT'], visuals['LQ'][[2, 1, 0], :, :]], dim=0)
+                    out = torchvision.utils.make_grid(out,nrow=1)
+
+                    tb_logger_valid.add_image('imgs', out, current_step)
 
                     # calculate PSNR
                     crop_size = opt['scale']
@@ -303,9 +309,11 @@ def main():
                     f.write(line)
 
                 # log
-                logger.info('# Validation # PSNR: {:.4e} SSIM: {:.4e}'.format(avg_psnr, avg_ssim))
+                if torch.isnan(avg_ssim) or torch.isnan(avg_psnr):
+                    sys.exit()
+                logger.info('# Validation # PSNR: {:.4f} SSIM: {:.4f}'.format(avg_psnr, avg_ssim))
                 logger_val = logging.getLogger('val')  # validation logger
-                logger_val.info('<epoch:{:3d}, iter:{:8,d}> psnr: {:.4e} SSIM: {:.4e}'.format(
+                logger_val.info('<epoch:{:3d}, iter:{:8,d}> psnr: {:.4f} SSIM: {:.4f}'.format(
                     epoch, current_step, avg_psnr, avg_ssim))
 
                 # tensorboard logger
