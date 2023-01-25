@@ -205,11 +205,6 @@ class SonyTif_Dataset(data.Dataset):
             hr = center_crop(hr, self.center_crop_hr_size),
             lr = center_crop(lr, self.center_crop_hr_size)
             his = center_crop(his, self.center_crop_hr_size)
-=======
-            hr, lr, his = center_crop(hr, self.center_crop_hr_size), center_crop(lr,
-                                                                                 self.center_crop_hr_size), center_crop(
-                his, self.center_crop_hr_size)
->>>>>>> e1a7af4bdbe4f8a49bf480bdd9ed8eddb79484e5
 
         if self.use_flip:
             hr, lr, his = random_flip(hr, lr, his)
