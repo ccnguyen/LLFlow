@@ -139,17 +139,13 @@ def mkdirs(paths):
 
 
 def mkdir_and_rename(path):
-    new_path = path.split('/')
-    exp = new_path[-1]
-    new_name = f'{("/").join(new_path[:-1])}/{get_timestamp()}_{exp}'
-    # new_name = path + '_archived_' + get_timestamp()
-    print('Path already exists. Rename it to [{:s}]'.format(new_name))
-    logger = logging.getLogger('base')
-    logger.info('Path already exists. Rename it to [{:s}]'.format(new_name))
-    os.makedirs(path, new_name)
-    # os.makedirs(path)
-    # os.makedirs()
-    return new_name
+    if os.path.exists(path):
+        new_name = path + '_archived_' + get_timestamp()
+        print('Path already exists. Rename it to [{:s}]'.format(new_name))
+        logger = logging.getLogger('base')
+        logger.info('Path already exists. Rename it to [{:s}]'.format(new_name))
+        os.rename(path, new_name)
+    os.makedirs(path, exist_ok=True)
 
 
 def set_random_seed(seed):

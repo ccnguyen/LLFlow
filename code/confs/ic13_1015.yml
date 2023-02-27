@@ -2,13 +2,13 @@
 
 
 #### general settings
-name: lowlight
+name: lol
 use_tb_logger: true
 model: LLFlow
 distortion: sr
 scale: 1
 gpu_ids: [0]
-dataset: lowlight
+dataset: LoL
 optimize_all_z: false
 cond_encoder: ConEncoder1
 train_gt_ratio: 0.2
@@ -32,7 +32,7 @@ le_curve: false
 #### datasets
 datasets:
   train:
-    root: /data/cindy/lowLightDataset
+    root: /home/cindy/PycharmProjects/data/LOL
     quant: 32
     use_shuffle: true
     n_workers: 1  # per GPU
@@ -47,7 +47,7 @@ datasets:
     gamma_aug: false
 
   val:
-    root: /data/cindy/lowLightDataset
+    root: /home/cindy/PycharmProjects/data/LOL
     n_workers: 1
     quant: 32
     n_max: 20
@@ -55,13 +55,13 @@ datasets:
     log_low: true
 
 #### Test Settings
-dataroot_unpaired: //home/cindy/PycharmProjects/LLFlow/test_dataset
+dataroot_unpaired: //home/cindy/PycharmProjects/data/ocr/test/ic_test
 #dataroot_GT: /home/cindy/PycharmProjects/data/lowLightDataset256/gt/test
 #dataroot_LR: /home/cindy/PycharmProjects/data/lowLightDataset256/input/test/1
-dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
-dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
-#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15/high
-#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15/low
+#dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778
+#dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low_778
+dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high
+dataroot_LR: /home/cindy/PycharmProjects/data/LOL/eval15_256/low
 model_path: /home/cindy/PycharmProjects/lowlight-baselines/LLFlow/LOL.pth
 heat: 0 # This is the standard deviation of the latent vectors
 
@@ -97,7 +97,7 @@ path:
 #### training settings: learning rate scheme, loss
 train:
   manual_seed: 10
-  lr_G: !!float 1e-5 # normalizing flow 5e-4; l1 loss train 5e-5
+  lr_G: !!float 1e-6 # normalizing flow 5e-4; l1 loss train 5e-5
   weight_decay_G: 0 # 1e-5 # 5e-5 # 1e-5
   beta1: 0.9
   beta2: 0.99
@@ -107,7 +107,7 @@ train:
   lr_gamma: 0.5
 
   weight_l1: 0
-  # flow_warm_up_iter: -1
+#  flow_warm_up_iter: -1
   weight_fl: 1
 
   niter: 30000 #200000

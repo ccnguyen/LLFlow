@@ -73,13 +73,14 @@ model_path
 
 ```bash
 python test_unpaired.py --opt /home/cindy/PycharmProjects/LLFlow/code/confs/LOL-pc.yml -n ./results
+python test_unpaired.py --opt /home/cindy/PycharmProjects/LLFlow/code/confs/CUTE80.yml -n ./results
 
 ```
 
 To test the model with paired data and obtain the evaluation results, e.g., PSNR, SSIM, and LPIPS. You need to specify the data path ```dataroot_LR```, ```dataroot_GT```, and model path ```model_path``` in the config file. Then run
 ```bash
 python test.py --opt your_config_path
-python test.py --opt /home/cindy/PycharmProjects/lowlight-baselines/LLFlow/code/confs/LOL-pc.yml
+python test.py --opt /home/cindy/PycharmProjects/LLFlow/code/confs/LOL-pc.yml
 
 # You need to specify an appropriate config file since it stores the config of the model, e.g., the number of layers.
 ```

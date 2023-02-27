@@ -8,6 +8,7 @@ import options.options as option
 from Measure import Measure, psnr
 from imresize import imresize
 from models import create_model
+import time
 import torch
 from utils.util import opt_get
 import numpy as np
@@ -114,8 +115,10 @@ def main():
 
     pad_factor = 2
 
-
+    total_time = 0
+    # breakpoint()
     for lr_path, hr_path, idx_test in zip(lr_paths, hr_paths, range(len(lr_paths))):
+        start_time = time.time()
 
         lr = imread(lr_path)
         hr = imread(hr_path)
@@ -136,11 +139,11 @@ def main():
             his = t(his)
             lr_t = torch.cat([lr_t, his], dim=1)
         heat = 0
-    
-        if df is not None and len(df[(df['heat'] == heat) & (df['name'] == idx_test)]) == 1:
-            continue
-        with torch.cuda.amp.autocast():
-            sr_t = model.get_sr(lq=lr_t.cuda(), heat=None)
+
+        # if df is not None and len(df[(df['heat'] == heat) & (df['name'] == idx_test)]) == 1:
+        #     continue
+
+        sr_t = model.get_sr(lq=lr_t.cuda(), heat=None)
 
         # We follow a similar way of 'Kind' to finetune the overall brightness as illustrated in Line 73 (https://github.com/zhangyhuaee/KinD/blob/master/evaluate_LOLdataset.py).
         # A normally-exposed image can also be obtained without finetuning the global brightness and we can achvieve compatible performance in terms of SSIM and LPIPS.
@@ -148,33 +151,34 @@ def main():
         mean_gt = cv2.cvtColor(hr.astype(np.float32), cv2.COLOR_BGR2GRAY).mean()/255
         sr = rgb(torch.clamp(sr_t*(mean_gt/mean_out), 0, 1))
         sr = sr[:h * scale, :w * scale]
+        total_time += (time.time() - start_time)
 
 
-        path_out_sr = os.path.join(test_dir, "{:0.2f}".format(heat).replace('.', ''), os.path.basename(hr_path))
-        # path_out_sr = os.path.join(test_dir, 'lol_778', os.path.basename(hr_path))
-
-        imwrite(path_out_sr, sr)
-
-        meas = OrderedDict(conf=conf, heat=heat, name=idx_test)
-        meas['PSNR'], meas['SSIM'], meas['LPIPS'] = measure.measure(sr, hr)
-
-        lr_reconstruct_rgb = imresize(sr, 1 / opt['scale'])
-        meas['LRC PSNR'] = psnr(lq_orig, lr_reconstruct_rgb)
-
-        str_out = format_measurements(meas)
-        print(str_out)
-
-        df = pd.DataFrame([meas]) if df is None else pd.concat([pd.DataFrame([meas]), df])
+        # path_out_sr = os.path.join(test_dir, "{:0.2f}".format(heat).replace('.', ''), os.path.basename(hr_path))
+        # imwrite(path_out_sr, sr)
+        #
+        # meas = OrderedDict(conf=conf, heat=heat, name=idx_test)
+        # meas['PSNR'], meas['SSIM'], meas['LPIPS'] = measure.measure(sr, hr)
+        #
+        # lr_reconstruct_rgb = imresize(sr, 1 / opt['scale'])
+        # meas['LRC PSNR'] = psnr(lq_orig, lr_reconstruct_rgb)
+        #
+        # str_out = format_measurements(meas)
+        # print(str_out)
+        #
+        # df = pd.DataFrame([meas]) if df is None else pd.concat([pd.DataFrame([meas]), df])
 
         # df.to_csv(path_out_measures + "_", index=False)
         # os.rename(path_out_measures + "_", path_out_measures)
 
-    df.to_csv(path_out_measures, index=False)
-    os.rename(path_out_measures, path_out_measures_final)
-
-    str_out = format_measurements(df.mean())
-    print(f"Results in: {path_out_measures_final}")
-    print('Mean: ' + str_out)
+    print(total_time / 15.0)
+    #
+    # df.to_csv(path_out_measures, index=False)
+    # os.rename(path_out_measures, path_out_measures_final)
+    #
+    # str_out = format_measurements(df.mean())
+    # print(f"Results in: {path_out_measures_final}")
+    # print('Mean: ' + str_out)
 
 
 def format_measurements(meas):

@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 *.pth
+results/*
+val_images/*
+.idea/*
 
 # C extensions
 *.so

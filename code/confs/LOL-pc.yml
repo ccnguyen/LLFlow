@@ -55,7 +55,7 @@ datasets:
     log_low: true
 
 #### Test Settings
-dataroot_unpaired: //home/cindy/PycharmProjects/LLFlow/test_dataset
+dataroot_unpaired: //home/cindy/PycharmProjects/data/LOL/eval15_256/low
 #dataroot_GT: /home/cindy/PycharmProjects/data/lowLightDataset256/gt/test
 #dataroot_LR: /home/cindy/PycharmProjects/data/lowLightDataset256/input/test/1
 #dataroot_GT: /home/cindy/PycharmProjects/data/LOL/eval15_256/high_778

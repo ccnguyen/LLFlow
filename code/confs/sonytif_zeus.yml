@@ -36,7 +36,7 @@ datasets:
     quant: 32
     use_shuffle: true
     n_workers: 1  # per GPU
-    batch_size: 4
+    batch_size: 8
     use_flip: true
     color: RGB
     use_crop: true
@@ -97,7 +97,7 @@ path:
 #### training settings: learning rate scheme, loss
 train:
   manual_seed: 10
-  lr_G: !!float 5e-4 # normalizing flow 5e-4; l1 loss train 5e-5
+  lr_G: !!float 1e-5 # normalizing flow 5e-4; l1 loss train 5e-5
   weight_decay_G: 0 # 1e-5 # 5e-5 # 1e-5
   beta1: 0.9
   beta2: 0.99
@@ -111,7 +111,7 @@ train:
   weight_fl: 1
 
   niter: 30000 #200000
-  val_freq: 200
+  val_freq: 300
 
 #### validation settings
 val:

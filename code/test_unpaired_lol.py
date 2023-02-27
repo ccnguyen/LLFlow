@@ -7,6 +7,7 @@ import argparse
 import options.options as option
 from Measure import Measure, psnr
 import random
+import time
 from imresize import imresize
 from models import create_model
 import torch
@@ -80,6 +81,7 @@ def hiseq_color_cv2_img(img):
     result = cv2.merge((bH, gH, rH))
     return result
 
+
 def decrease_brightness(img, value=30):
     hsv = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)
     h, s, v = cv2.split(hsv)
@@ -89,10 +91,9 @@ def decrease_brightness(img, value=30):
     v = v.astype(np.uint8)
     # v[v < value] = 0
     # v[v >= value] -= value
-    final_hsv = cv2.merge((h,s,v))
+    final_hsv = cv2.merge((h, s, v))
     img = cv2.cvtColor(final_hsv, cv2.COLOR_HSV2RGB)
     return img
-
 
 
 def auto_padding(img, times=16):
@@ -109,8 +110,6 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--opt", default="./confs/LOL_smallNet.yml")
     parser.add_argument("-n", "--name", default="unpaired")
-    parser.add_argument('--bright', type=float, default=0.6)
-    parser.add_argument('--noise', type=float, default=0.05)
     parser.add_argument('--dataset', type=str, required=True)
     args = parser.parse_args()
     conf_path = args.opt
@@ -118,29 +117,32 @@ def main():
     model, opt = load_model(conf_path)
     model.netG = model.netG.cuda()
 
-    opt['dataroot_unpaired'] = f'/home/cindy/PycharmProjects/data/ocr/test/{args.dataset}'
-    
+    # opt['dataroot_unpaired'] = f'/home/cindy/PycharmProjects/data/ocr/test/{args.dataset}'
+
     lr_dir = opt['dataroot_unpaired']
     lr_paths = fiFindByWildcard(os.path.join(lr_dir, '*.*'))
     lr_paths = [f for f in lr_paths if '.png' in f]
     print(lr_paths)
 
-    this_dir = os.path.dirname(os.path.realpath(__file__))
-    test_dir = os.path.join(this_dir, '..', 'results', f'{args.dataset}_v{args.bright}_n{args.noise}')
-    print(f"Out dir: {test_dir}")
+    # this_dir = os.path.dirname(os.path.realpath(__file__))
+    # test_dir = os.path.join(this_dir, '..', 'results', f'{args.dataset}_v{args.bright}_n{args.noise}')
+    # print(f"Out dir: {test_dir}")
 
     # lr_paths = random.sample(lr_paths, 10)
     # my_list = ['95.png', '231.png', '282.png', '300.png', '466.png', '632.png', '702.png', '710.png', '739.png', '992.png']
 
     # lr_paths = [f for f in lr_paths if f.split('/')[-1] in my_list]
+    total_time = 0.0
 
     for lr_path, idx_test in tqdm.tqdm(zip(lr_paths, range(len(lr_paths)))):
         print(lr_path)
+
+        start_time = time.time()
         lr = imread(lr_path)
-        lr = decrease_brightness(lr, value=args.bright) / 255.0
-        lr = lr + np.random.randn(*lr.shape) * args.noise
-        lr = np.clip(lr, 0.0, 1.0)
-        lr = (lr * 255).astype(np.uint8)
+        # lr = decrease_brightness(lr, value=args.bright) / 255.0
+        # lr = lr + np.random.randn(*lr.shape) * args.noise
+        # lr = np.clip(lr, 0.0, 1.0)
+        # lr = (lr * 255).astype(np.uint8)
         raw_shape = lr.shape
         lr, padding_params = auto_padding(lr)
         his = hiseq_color_cv2_img(lr)
@@ -158,9 +160,12 @@ def main():
 
         sr = rgb(torch.clamp(sr_t, 0, 1)[:, :, padding_params[0]:sr_t.shape[2] - padding_params[1],
                  padding_params[2]:sr_t.shape[3] - padding_params[3]])
+
+        total_time += time.time() - start_time
         assert raw_shape == sr.shape
-        path_out_sr = os.path.join(test_dir, os.path.basename(lr_path))
-        imwrite(path_out_sr, sr)
+        # path_out_sr = os.path.join(test_dir, os.path.basename(lr_path))
+        # imwrite(path_out_sr, sr)
+    print(total_time / 15)
 
 
 def format_measurements(meas):

@@ -67,13 +67,13 @@ class LowLight_Dataset(data.Dataset):
     def __getitem__(self, item):
         dark_path = f'{self.dark_root}/{self.dark_paths[item]}'
 
-        lr = cv2.imread(dark_path)
+        lr = skimage.io.imread(dark_path)
 
         light_path = f'{self.light_root}/{dark_path.split("/")[-1][0:5]}_00_10s.png'
         if not os.path.exists(light_path):
             light_path = f'{self.light_root}/{dark_path.split("/")[-1][0:5]}_00_30s.png'
 
-        hr = cv2.imread(light_path)
+        hr = skimage.io.imread(light_path)
         f_name = self.dark_paths[item][:-4]
         his = self.hiseq_color_cv2_img(lr)
         # lr, hr, f_name, his = self.pairs[item]
@@ -140,8 +140,10 @@ class SonyTif_Dataset(data.Dataset):
         assert os.path.isfile(file_path)
         with open(file_path) as file:
             lines = []
-            while (line := file.readline().rstrip()):
-                lines.append(line)
+            for line in file:
+                lines.append(line.rstrip())
+            # while (line := file.readline().rstrip()):
+            #     lines.append(line)
 
         input_fnames = []
         gt_fnames = []
@@ -182,7 +184,7 @@ class SonyTif_Dataset(data.Dataset):
         return result
 
     def to_tensor(self, x):
-        return torch.from_numpy(x).permute(2, 0, 1).type(torch.float32)
+        return torch.from_numpy(x.copy()).permute(2, 0, 1).type(torch.float32)
 
     def __getitem__(self, item):
 
@@ -212,8 +214,8 @@ class SonyTif_Dataset(data.Dataset):
         if self.use_rot:
             hr, lr, his = random_rotation(hr, lr, his)
 
-        hr = self.to_tensor(hr)
-        lr = self.to_tensor(lr)
+        hr = self.to_tensor(hr.copy())
+        lr = self.to_tensor(lr.copy())
 
         if self.use_noise and random.random() < self.noise_prob:
             lr = torch.randn(lr.shape) * (self.noise_level / 255) + lr
