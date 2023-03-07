@@ -1,19 +1,13 @@
 import glob
-import sys
-from collections import OrderedDict
 import tqdm
 from natsort import natsort
 import argparse
 import options.options as option
-from Measure import Measure, psnr
-import random
 import time
-from imresize import imresize
 from models import create_model
 import torch
 from utils.util import opt_get
 import numpy as np
-import pandas as pd
 import os
 import cv2
 
@@ -123,15 +117,6 @@ def main():
     lr_paths = fiFindByWildcard(os.path.join(lr_dir, '*.*'))
     lr_paths = [f for f in lr_paths if '.png' in f]
     print(lr_paths)
-
-    # this_dir = os.path.dirname(os.path.realpath(__file__))
-    # test_dir = os.path.join(this_dir, '..', 'results', f'{args.dataset}_v{args.bright}_n{args.noise}')
-    # print(f"Out dir: {test_dir}")
-
-    # lr_paths = random.sample(lr_paths, 10)
-    # my_list = ['95.png', '231.png', '282.png', '300.png', '466.png', '632.png', '702.png', '710.png', '739.png', '992.png']
-
-    # lr_paths = [f for f in lr_paths if f.split('/')[-1] in my_list]
     total_time = 0.0
 
     for lr_path, idx_test in tqdm.tqdm(zip(lr_paths, range(len(lr_paths)))):
@@ -163,8 +148,6 @@ def main():
 
         total_time += time.time() - start_time
         assert raw_shape == sr.shape
-        # path_out_sr = os.path.join(test_dir, os.path.basename(lr_path))
-        # imwrite(path_out_sr, sr)
     print(total_time / 15)
 
 

@@ -143,7 +143,14 @@ def main():
         # if df is not None and len(df[(df['heat'] == heat) & (df['name'] == idx_test)]) == 1:
         #     continue
 
+        def count_parameters(model):
+            return sum(p.numel() for p in model.parameters() if p.requires_grad)
+
+        print(count_parameters(model.netG))
+
         sr_t = model.get_sr(lq=lr_t.cuda(), heat=None)
+
+
 
         # We follow a similar way of 'Kind' to finetune the overall brightness as illustrated in Line 73 (https://github.com/zhangyhuaee/KinD/blob/master/evaluate_LOLdataset.py).
         # A normally-exposed image can also be obtained without finetuning the global brightness and we can achvieve compatible performance in terms of SSIM and LPIPS.
